@@ -128,8 +128,7 @@ function getWorkDays(examDate) {
   const days = [];
   const cur = new Date(TODAY);
   while (cur < examDate) {
-    const d = cur.getDay();
-    if (d !== 0) days.push(new Date(cur));
+    days.push(new Date(cur));
     cur.setDate(cur.getDate() + 1);
   }
   return days;
@@ -201,13 +200,21 @@ function ProgressBar({ pct, color }) {
 }
 
 export default function App() {
-  const [statuses, setStatuses] = useState({});
+  const [statuses, setStatuses] = useState(() => {
+    try {
+      const r = localStorage.getItem("revision_statuses");
+      return r ? JSON.parse(r) : {};
+    } catch { return {}; }
+  });
   const [tab, setTab] = useState("matieres");
   const [openSubjects, setOpenSubjects] = useState({});
-  const [loaded, setLoaded] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  const [examDateStr, setExamDateStr] = useState("2026-03-21");
-  const [tempDateStr, setTempDateStr] = useState("2026-03-21");
+  const [examDateStr, setExamDateStr] = useState(() => {
+    try { return localStorage.getItem("exam_date") || "2026-03-21"; } catch { return "2026-03-21"; }
+  });
+  const [tempDateStr, setTempDateStr] = useState(() => {
+    try { return localStorage.getItem("exam_date") || "2026-03-21"; } catch { return "2026-03-21"; }
+  });
 
   const examDate = (() => {
     const d = new Date(examDateStr + "T00:00:00");
@@ -215,26 +222,12 @@ export default function App() {
   })();
 
   useEffect(() => {
-    async function load() {
-      try {
-        const r = await window.storage.get("revision_statuses");
-        if (r?.value) setStatuses(JSON.parse(r.value));
-        const d = await window.storage.get("exam_date");
-        if (d?.value) { setExamDateStr(d.value); setTempDateStr(d.value); }
-      } catch {}
-      setLoaded(true);
-    }
-    load();
-  }, []);
-
-  useEffect(() => {
-    if (!loaded) return;
-    window.storage.set("revision_statuses", JSON.stringify(statuses)).catch(() => {});
-  }, [statuses, loaded]);
+    try { localStorage.setItem("revision_statuses", JSON.stringify(statuses)); } catch {}
+  }, [statuses]);
 
   const saveExamDate = () => {
     setExamDateStr(tempDateStr);
-    window.storage.set("exam_date", tempDateStr).catch(() => {});
+    try { localStorage.setItem("exam_date", tempDateStr); } catch {}
     setShowSettings(false);
   };
 
@@ -295,7 +288,7 @@ export default function App() {
 
       {/* Header */}
       <div style={{ background: "linear-gradient(135deg, #6c3fff, #e84393)", padding: "24px 20px 20px", color: "white", textAlign: "center", boxShadow: "0 4px 20px rgba(108,63,255,0.3)", position: "relative" }}>
-        <button onClick={() => { setTempDateStr(examDateStr); setShowSettings(true); }} style={{ position: "absolute", top: 16, right: 16, background: "rgba(255,255,255,0.2)", border: "none", borderRadius: 10, padding: "6px 12px", color: "white", cursor: "pointer", fontSize: 18, fontFamily: "inherit" }} title="Paramètres">⚙️</button>
+        <button onClick={() => { setTempDateStr(examDateStr); setShowSettings(true); }} style={{ position: "absolute", top: 16, right: 16, zIndex: 1, background: "rgba(255,255,255,0.2)", border: "none", borderRadius: 10, padding: "6px 12px", color: "white", cursor: "pointer", fontSize: 18, fontFamily: "inherit" }} title="Paramètres">⚙️</button>
         <div style={{ fontSize: 13, opacity: 0.85, letterSpacing: 2, textTransform: "uppercase", marginBottom: 4 }}>Révisions 4ème</div>
         <div style={{ fontSize: 26, fontWeight: 800, marginBottom: 4 }}>Épreuves Communes 📚</div>
         <div style={{ fontSize: 13, opacity: 0.9 }}>
@@ -354,13 +347,13 @@ export default function App() {
         ))}
       </div>
 
-      <div style={{ maxWidth: 700, margin: "0 auto", padding: "20px 16px 40px" }}>
+      <div style={{ margin: "0 auto", padding: "20px 16px 40px" }}>
 
         {/* MATIÈRES TAB */}
         {tab === "matieres" && (
           <div>
             <p style={{ color: "#888", fontSize: 13, textAlign: "center", marginBottom: 16 }}>
-              Cliquez sur le statut d'une leçon pour le faire avancer : <strong>À réviser → Lue → Apprise → Validée</strong>
+              Cliquez sur le statut d'une leçon pour le faire avancer : <br></br><strong>À réviser → Lue → Apprise → Validée</strong>
             </p>
             {SUBJECTS.map(subject => {
               const subIds = subject.lessons.map((_, i) => `${subject.id}_${i}`);
@@ -378,7 +371,7 @@ export default function App() {
                   >
                     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                       <span style={{ fontSize: 22 }}>{subject.emoji}</span>
-                      <div style={{ flexGrow: 1 }}>
+                      <div style={{ flexGrow: 1, minWidth: 0 }}>
                         <div style={{ fontWeight: 800, fontSize: 15, color: "#222" }}>{subject.label}</div>
                         <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 4 }}>
                           <ProgressBar pct={subPct} color={subject.color} />
@@ -409,6 +402,7 @@ export default function App() {
                               fontSize: 13,
                               color: status === "validee" ? "#aaa" : "#333",
                               flexGrow: 1,
+                              minWidth: 0,
                               textDecoration: status === "validee" ? "line-through" : "none",
                             }}>{lesson}</span>
                             <StatusBadge status={status} onClick={() => cycleStatus(id)} />
@@ -427,8 +421,7 @@ export default function App() {
         {tab === "planning" && (
           <div>
             <div style={{ background: "white", borderRadius: 16, padding: "14px 16px", marginBottom: 16, boxShadow: "0 2px 8px rgba(0,0,0,0.06)", textAlign: "center" }}>
-              <div style={{ fontSize: 14, color: "#555" }}>Les leçons <strong>déjà validées</strong> ne figurent pas dans le planning.</div>
-              <div style={{ fontSize: 13, color: "#aaa", marginTop: 4 }}>Chaque jour hors dimanche = une session de révision</div>
+              <div style={{ fontSize: 14, color: "#555" }}>Les leçons <strong>déjà validées</strong> disparaissent du planning.</div>
             </div>
             {workDays.map(day => {
               const key = day.toDateString();
@@ -476,7 +469,7 @@ export default function App() {
                             padding: "5px 10px",
                           }}>
                             <span>{sub.emoji}</span>
-                            <span style={{ fontSize: 13, color: "#333", flexGrow: 1 }}>{lesson}</span>
+                            <span style={{ fontSize: 13, color: "#333", flexGrow: 1, minWidth: 0 }}>{lesson}</span>
                             <span style={{ fontSize: 11, fontWeight: 700, color: st.color }}>{st.icon}</span>
                           </div>
                         );
@@ -528,7 +521,7 @@ export default function App() {
                   <div key={subject.id} style={{ marginBottom: 14 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 5 }}>
                       <span>{subject.emoji}</span>
-                      <span style={{ fontWeight: 700, fontSize: 14, color: "#333", flexGrow: 1 }}>{subject.label}</span>
+                      <span style={{ fontWeight: 700, fontSize: 14, color: "#333", flexGrow: 1, minWidth: 0 }}>{subject.label}</span>
                       <span style={{ fontWeight: 800, fontSize: 13, color: subject.color }}>{pct}%</span>
                     </div>
                     {/* Stacked bar */}
