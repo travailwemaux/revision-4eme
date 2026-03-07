@@ -1,0 +1,555 @@
+import { useState, useEffect, useCallback } from "react";
+
+const SUBJECTS = [
+  {
+    id: "francais", label: "Français", emoji: "📖", color: "#e8637a",
+    lessons: [
+      "Grammaire : les propositions subordonnées relatives",
+      "Grammaire : les propositions subordonnées conjonctives",
+      "Conjugaison : le subjonctif présent",
+      "Conjugaison : le conditionnel",
+      "Orthographe : accord du participe passé",
+      "Lexique : préfixes et suffixes latins/grecs",
+      "Lecture : figures de style (métaphore, comparaison, hyperbole…)",
+      "Textes : récit d'aventure & roman historique",
+      "Textes : poésie (versification, registres)",
+      "Rédaction : le portrait et la description",
+      "Rédaction : argumentation et point de vue",
+    ]
+  },
+  {
+    id: "maths", label: "Mathématiques", emoji: "📐", color: "#5b7fe8",
+    lessons: [
+      "Calcul littéral : développer et factoriser",
+      "Équations du premier degré",
+      "Systèmes d'équations",
+      "Puissances et notation scientifique",
+      "Fractions : opérations et simplification",
+      "Proportionnalité et pourcentages",
+      "Statistiques : moyenne, médiane, étendue",
+      "Géométrie : théorème de Pythagore",
+      "Géométrie : théorème de Thalès",
+      "Géométrie : symétrie centrale",
+      "Trigonométrie : sin, cos, tan dans le triangle rectangle",
+    ]
+  },
+  {
+    id: "histoire", label: "Histoire-Géographie", emoji: "🌍", color: "#e8a23a",
+    lessons: [
+      "Histoire : L'Europe et le monde au XVIIIe siècle",
+      "Histoire : La Révolution française",
+      "Histoire : L'Empire napoléonien",
+      "Histoire : Les révolutions industrielles",
+      "Histoire : Le XIXe siècle — nationalismes et colonisation",
+      "Géographie : dynamiques des espaces productifs",
+      "Géographie : mobilités et échanges mondiaux",
+      "Géographie : les inégalités de développement",
+      "EMC : droits et libertés fondamentaux",
+      "EMC : citoyenneté et démocratie",
+    ]
+  },
+  {
+    id: "anglais", label: "Anglais (LV1)", emoji: "🇬🇧", color: "#5bbfe8",
+    lessons: [
+      "Vocabulaire : famille, relations sociales",
+      "Vocabulaire : société et environnement",
+      "Grammaire : prétérit simple vs be+ing",
+      "Grammaire : present perfect",
+      "Grammaire : modaux (can, could, must, should, would)",
+      "Grammaire : conditionnel (if + clauses)",
+      "Compréhension écrite : inférence et repérage",
+      "Expression écrite : décrire et raconter",
+    ]
+  },
+  {
+    id: "espagnol", label: "Espagnol (LV2)", emoji: "🇪🇸", color: "#e85b5b",
+    lessons: [
+      "Vocabulaire : vie quotidienne et loisirs",
+      "Vocabulaire : pays hispanophones",
+      "Grammaire : les verbes en -ar, -er, -ir au présent",
+      "Grammaire : les verbes irréguliers courants",
+      "Grammaire : le prétérit indéfini (indefinido)",
+      "Grammaire : les pronoms COD et COI",
+      "Compréhension et expression orale",
+    ]
+  },
+  {
+    id: "svt", label: "SVT", emoji: "🔬", color: "#5be87a",
+    lessons: [
+      "La reproduction sexuée chez les animaux",
+      "La reproduction chez les plantes à fleurs",
+      "La transmission du vivant — génétique",
+      "Le système nerveux et la coordination",
+      "L'immunité — défenses de l'organisme",
+      "Les écosystèmes et la biodiversité",
+      "L'impact humain sur l'environnement",
+    ]
+  },
+  {
+    id: "physique", label: "Physique-Chimie", emoji: "⚗️", color: "#b05be8",
+    lessons: [
+      "La lumière : réflexion et réfraction",
+      "Les couleurs et la dispersion de la lumière",
+      "Les atomes et les molécules",
+      "Les réactions chimiques (équations bilan)",
+      "Les mélanges et la dissolution",
+      "L'électricité : tension, intensité, résistance",
+      "Les lois d'Ohm et de Kirchhoff",
+    ]
+  },
+  {
+    id: "techno", label: "Technologie", emoji: "💻", color: "#e8c85b",
+    lessons: [
+      "Les systèmes automatisés et programmés",
+      "Algorithmique et programmation (Scratch/Python)",
+      "Modélisation numérique — CAO",
+      "Communication et réseaux informatiques",
+      "Impact des objets techniques sur l'environnement",
+    ]
+  },
+];
+
+const STATUS_STEPS = [
+  { key: "todo",     label: "À réviser", color: "#d0d0d0", bg: "#f5f5f5",  icon: "○" },
+  { key: "lue",      label: "Lue",       color: "#5b9fe8", bg: "#eaf2ff",  icon: "👁" },
+  { key: "apprise",  label: "Apprise",   color: "#e8a23a", bg: "#fff7e6",  icon: "🧠" },
+  { key: "validee",  label: "Validée",   color: "#2ecf72", bg: "#e6fff1",  icon: "✅" },
+];
+
+const TODAY = new Date();
+TODAY.setHours(0, 0, 0, 0);
+
+function getDaysUntilExam(examDate) {
+  const diff = examDate - TODAY;
+  return Math.ceil(diff / (1000 * 60 * 60 * 24));
+}
+
+function getWorkDays(examDate) {
+  const days = [];
+  const cur = new Date(TODAY);
+  while (cur < examDate) {
+    const d = cur.getDay();
+    if (d !== 0) days.push(new Date(cur));
+    cur.setDate(cur.getDate() + 1);
+  }
+  return days;
+}
+
+function distributeLessons(statuses, examDate) {
+  const allLessons = [];
+  SUBJECTS.forEach(s => {
+    s.lessons.forEach((l, i) => {
+      const id = `${s.id}_${i}`;
+      if (statuses[id] !== "validee") {
+        allLessons.push({ subjectId: s.id, lessonIndex: i, id });
+      }
+    });
+  });
+
+  const workDays = getWorkDays(examDate);
+  const plan = {};
+  workDays.forEach(d => { plan[d.toDateString()] = []; });
+
+  allLessons.forEach((lesson, idx) => {
+    const dayKey = workDays[idx % workDays.length].toDateString();
+    plan[dayKey].push(lesson);
+  });
+  return { plan, workDays };
+}
+
+function formatDate(d) {
+  return d.toLocaleDateString("fr-FR", { weekday: "short", day: "numeric", month: "short" });
+}
+
+function StatusBadge({ status, onClick }) {
+  const s = STATUS_STEPS.find(x => x.key === status) || STATUS_STEPS[0];
+  return (
+    <button
+      onClick={onClick}
+      title="Cliquer pour changer le statut"
+      style={{
+        background: s.bg,
+        color: s.color,
+        border: `2px solid ${s.color}`,
+        borderRadius: 20,
+        padding: "3px 12px",
+        fontSize: 12,
+        fontWeight: 700,
+        cursor: "pointer",
+        whiteSpace: "nowrap",
+        fontFamily: "inherit",
+        transition: "all 0.15s",
+      }}
+    >
+      {s.icon} {s.label}
+    </button>
+  );
+}
+
+function ProgressBar({ pct, color }) {
+  return (
+    <div style={{ background: "#eee", borderRadius: 8, height: 10, overflow: "hidden", flexGrow: 1 }}>
+      <div style={{
+        width: `${pct}%`,
+        background: color,
+        height: "100%",
+        borderRadius: 8,
+        transition: "width 0.4s ease",
+      }} />
+    </div>
+  );
+}
+
+export default function App() {
+  const [statuses, setStatuses] = useState({});
+  const [tab, setTab] = useState("matieres");
+  const [openSubjects, setOpenSubjects] = useState({});
+  const [loaded, setLoaded] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [examDateStr, setExamDateStr] = useState("2026-03-21");
+  const [tempDateStr, setTempDateStr] = useState("2026-03-21");
+
+  const examDate = (() => {
+    const d = new Date(examDateStr + "T00:00:00");
+    return isNaN(d) ? new Date("2026-03-21") : d;
+  })();
+
+  useEffect(() => {
+    async function load() {
+      try {
+        const r = await window.storage.get("revision_statuses");
+        if (r?.value) setStatuses(JSON.parse(r.value));
+        const d = await window.storage.get("exam_date");
+        if (d?.value) { setExamDateStr(d.value); setTempDateStr(d.value); }
+      } catch {}
+      setLoaded(true);
+    }
+    load();
+  }, []);
+
+  useEffect(() => {
+    if (!loaded) return;
+    window.storage.set("revision_statuses", JSON.stringify(statuses)).catch(() => {});
+  }, [statuses, loaded]);
+
+  const saveExamDate = () => {
+    setExamDateStr(tempDateStr);
+    window.storage.set("exam_date", tempDateStr).catch(() => {});
+    setShowSettings(false);
+  };
+
+  const cycleStatus = useCallback((id) => {
+    setStatuses(prev => {
+      const cur = prev[id] || "todo";
+      const idx = STATUS_STEPS.findIndex(s => s.key === cur);
+      const next = STATUS_STEPS[(idx + 1) % STATUS_STEPS.length].key;
+      return { ...prev, [id]: next };
+    });
+  }, []);
+
+  // Global stats
+  const allIds = SUBJECTS.flatMap(s => s.lessons.map((_, i) => `${s.id}_${i}`));
+  const total = allIds.length;
+  const countByStatus = key => allIds.filter(id => (statuses[id] || "todo") === key).length;
+  const validated = countByStatus("validee");
+  const learned = countByStatus("apprise");
+  const read = countByStatus("lue");
+  const done = validated + learned + read;
+  const globalPct = Math.round((done / total) * 100);
+  const validatedPct = Math.round((validated / total) * 100);
+
+  const { plan, workDays } = distributeLessons(statuses, examDate);
+
+  const toggleSubject = id => setOpenSubjects(p => ({ ...p, [id]: !p[id] }));
+
+  const daysLeft = getDaysUntilExam(examDate);
+  const examDateFormatted = examDate.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
+
+  return (
+    <div style={{ fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif", minHeight: "100vh", background: "linear-gradient(135deg, #f8f4ff 0%, #fff4f8 50%, #f4f8ff 100%)" }}>
+
+      {/* Settings Modal */}
+      {showSettings && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.45)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div style={{ background: "white", borderRadius: 20, padding: 28, width: 300, boxShadow: "0 8px 40px rgba(0,0,0,0.2)" }}>
+            <div style={{ fontWeight: 800, fontSize: 18, marginBottom: 6 }}>⚙️ Paramètres</div>
+            <div style={{ color: "#888", fontSize: 13, marginBottom: 20 }}>Choisissez la date de l'examen</div>
+            <label style={{ display: "block", fontWeight: 700, fontSize: 13, marginBottom: 6, color: "#555" }}>Date de l'examen</label>
+            <input
+              type="date"
+              value={tempDateStr}
+              onChange={e => setTempDateStr(e.target.value)}
+              style={{ width: "100%", padding: "10px 12px", borderRadius: 10, border: "2px solid #e0d0ff", fontSize: 15, fontFamily: "inherit", outline: "none", boxSizing: "border-box" }}
+            />
+            <div style={{ display: "flex", gap: 10, marginTop: 20 }}>
+              <button onClick={() => setShowSettings(false)} style={{ flex: 1, padding: "10px", borderRadius: 10, border: "2px solid #eee", background: "white", cursor: "pointer", fontFamily: "inherit", fontWeight: 600, color: "#888" }}>
+                Annuler
+              </button>
+              <button onClick={saveExamDate} style={{ flex: 1, padding: "10px", borderRadius: 10, border: "none", background: "linear-gradient(135deg, #6c3fff, #e84393)", color: "white", cursor: "pointer", fontFamily: "inherit", fontWeight: 700 }}>
+                Enregistrer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Header */}
+      <div style={{ background: "linear-gradient(135deg, #6c3fff, #e84393)", padding: "24px 20px 20px", color: "white", textAlign: "center", boxShadow: "0 4px 20px rgba(108,63,255,0.3)", position: "relative" }}>
+        <button onClick={() => { setTempDateStr(examDateStr); setShowSettings(true); }} style={{ position: "absolute", top: 16, right: 16, background: "rgba(255,255,255,0.2)", border: "none", borderRadius: 10, padding: "6px 12px", color: "white", cursor: "pointer", fontSize: 18, fontFamily: "inherit" }} title="Paramètres">⚙️</button>
+        <div style={{ fontSize: 13, opacity: 0.85, letterSpacing: 2, textTransform: "uppercase", marginBottom: 4 }}>Révisions 4ème</div>
+        <div style={{ fontSize: 26, fontWeight: 800, marginBottom: 4 }}>Épreuves Communes 📚</div>
+        <div style={{ fontSize: 13, opacity: 0.9 }}>
+          Examen le <strong>{examDateFormatted}</strong> · <strong>{daysLeft > 0 ? `${daysLeft} jours restants` : daysLeft === 0 ? "C'est aujourd'hui ! 💪" : "Examen passé"}</strong>
+        </div>
+
+        {/* Global progress */}
+        <div style={{ marginTop: 16, background: "rgba(255,255,255,0.15)", borderRadius: 16, padding: "12px 16px", maxWidth: 500, margin: "16px auto 0" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6, fontSize: 13 }}>
+            <span>Progression globale</span>
+            <span style={{ fontWeight: 800 }}>{globalPct}%</span>
+          </div>
+          <div style={{ background: "rgba(255,255,255,0.25)", borderRadius: 8, height: 12, overflow: "hidden" }}>
+            <div style={{ width: `${globalPct}%`, background: "white", height: "100%", borderRadius: 8, transition: "width 0.4s" }} />
+          </div>
+          <div style={{ display: "flex", gap: 12, marginTop: 10, justifyContent: "center", fontSize: 12, flexWrap: "wrap" }}>
+            {[
+              { label: "Lues", val: read, color: "#93c4ff" },
+              { label: "Apprises", val: learned, color: "#ffd093" },
+              { label: "Validées", val: validated, color: "#93ffc0" },
+            ].map(x => (
+              <span key={x.label} style={{ background: "rgba(255,255,255,0.2)", borderRadius: 12, padding: "3px 10px" }}>
+                <span style={{ color: x.color, fontWeight: 700 }}>●</span> {x.label} : <strong>{x.val}</strong>
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div style={{ display: "flex", background: "white", boxShadow: "0 2px 8px rgba(0,0,0,0.07)", position: "sticky", top: 0, zIndex: 10 }}>
+        {[
+          { key: "matieres", label: "📚 Matières" },
+          { key: "planning", label: "📅 Planning" },
+          { key: "stats", label: "📊 Stats" },
+        ].map(t => (
+          <button
+            key={t.key}
+            onClick={() => setTab(t.key)}
+            style={{
+              flex: 1,
+              padding: "14px 8px",
+              border: "none",
+              background: "none",
+              fontWeight: tab === t.key ? 800 : 500,
+              color: tab === t.key ? "#6c3fff" : "#888",
+              borderBottom: tab === t.key ? "3px solid #6c3fff" : "3px solid transparent",
+              cursor: "pointer",
+              fontSize: 14,
+              fontFamily: "inherit",
+              transition: "all 0.2s",
+            }}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      <div style={{ maxWidth: 700, margin: "0 auto", padding: "20px 16px 40px" }}>
+
+        {/* MATIÈRES TAB */}
+        {tab === "matieres" && (
+          <div>
+            <p style={{ color: "#888", fontSize: 13, textAlign: "center", marginBottom: 16 }}>
+              Cliquez sur le statut d'une leçon pour le faire avancer : <strong>À réviser → Lue → Apprise → Validée</strong>
+            </p>
+            {SUBJECTS.map(subject => {
+              const subIds = subject.lessons.map((_, i) => `${subject.id}_${i}`);
+              const subValidated = subIds.filter(id => statuses[id] === "validee").length;
+              const subDone = subIds.filter(id => statuses[id] && statuses[id] !== "todo").length;
+              const subPct = Math.round((subDone / subIds.length) * 100);
+              const isOpen = openSubjects[subject.id] !== false; // open by default
+
+              return (
+                <div key={subject.id} style={{ background: "white", borderRadius: 16, marginBottom: 12, boxShadow: "0 2px 12px rgba(0,0,0,0.07)", overflow: "hidden", border: `2px solid ${subject.color}22` }}>
+                  {/* Subject header */}
+                  <button
+                    onClick={() => toggleSubject(subject.id)}
+                    style={{ width: "100%", background: "none", border: "none", padding: "14px 16px", cursor: "pointer", fontFamily: "inherit", textAlign: "left" }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                      <span style={{ fontSize: 22 }}>{subject.emoji}</span>
+                      <div style={{ flexGrow: 1 }}>
+                        <div style={{ fontWeight: 800, fontSize: 15, color: "#222" }}>{subject.label}</div>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 4 }}>
+                          <ProgressBar pct={subPct} color={subject.color} />
+                          <span style={{ fontSize: 12, fontWeight: 700, color: subject.color, minWidth: 36 }}>{subPct}%</span>
+                        </div>
+                      </div>
+                      <span style={{ fontSize: 12, color: "#aaa", marginLeft: 4 }}>
+                        {subValidated}/{subIds.length} ✅ {isOpen ? "▲" : "▼"}
+                      </span>
+                    </div>
+                  </button>
+
+                  {isOpen && (
+                    <div style={{ borderTop: `1px solid ${subject.color}22`, padding: "4px 0 8px" }}>
+                      {subject.lessons.map((lesson, i) => {
+                        const id = `${subject.id}_${i}`;
+                        const status = statuses[id] || "todo";
+                        return (
+                          <div key={id} style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 10,
+                            padding: "8px 16px",
+                            background: status === "validee" ? "#f0fff7" : "transparent",
+                            borderBottom: "1px solid #f5f5f5",
+                          }}>
+                            <span style={{
+                              fontSize: 13,
+                              color: status === "validee" ? "#aaa" : "#333",
+                              flexGrow: 1,
+                              textDecoration: status === "validee" ? "line-through" : "none",
+                            }}>{lesson}</span>
+                            <StatusBadge status={status} onClick={() => cycleStatus(id)} />
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* PLANNING TAB */}
+        {tab === "planning" && (
+          <div>
+            <div style={{ background: "white", borderRadius: 16, padding: "14px 16px", marginBottom: 16, boxShadow: "0 2px 8px rgba(0,0,0,0.06)", textAlign: "center" }}>
+              <div style={{ fontSize: 14, color: "#555" }}>Les leçons <strong>déjà validées</strong> ne figurent pas dans le planning.</div>
+              <div style={{ fontSize: 13, color: "#aaa", marginTop: 4 }}>Chaque jour hors dimanche = une session de révision</div>
+            </div>
+            {workDays.map(day => {
+              const key = day.toDateString();
+              const dayLessons = plan[key] || [];
+              const isToday = day.toDateString() === TODAY.toDateString();
+              const isPast = day < TODAY;
+
+              return (
+                <div key={key} style={{
+                  background: isToday ? "linear-gradient(135deg, #f0eaff, #ffe8f5)" : isPast ? "#fafafa" : "white",
+                  borderRadius: 14,
+                  marginBottom: 10,
+                  boxShadow: isToday ? "0 3px 16px rgba(108,63,255,0.18)" : "0 2px 8px rgba(0,0,0,0.05)",
+                  overflow: "hidden",
+                  border: isToday ? "2px solid #6c3fff" : "2px solid transparent",
+                }}>
+                  <div style={{ padding: "10px 14px", display: "flex", alignItems: "center", gap: 8 }}>
+                    <div style={{
+                      fontWeight: 800, fontSize: 14,
+                      color: isToday ? "#6c3fff" : isPast ? "#bbb" : "#333",
+                      minWidth: 140,
+                    }}>
+                      {isToday && <span style={{ fontSize: 10, background: "#6c3fff", color: "white", borderRadius: 8, padding: "1px 6px", marginRight: 6 }}>AUJOURD'HUI</span>}
+                      {formatDate(day)}
+                    </div>
+                    <span style={{ fontSize: 12, color: "#aaa" }}>
+                      {dayLessons.length === 0 ? "✨ Journée libre" : `${dayLessons.length} leçon${dayLessons.length > 1 ? "s" : ""}`}
+                    </span>
+                  </div>
+                  {dayLessons.length > 0 && (
+                    <div style={{ padding: "0 14px 10px", display: "flex", flexDirection: "column", gap: 5 }}>
+                      {dayLessons.map(({ subjectId, lessonIndex, id }) => {
+                        const sub = SUBJECTS.find(s => s.id === subjectId);
+                        const lesson = sub.lessons[lessonIndex];
+                        const status = statuses[id] || "todo";
+                        const st = STATUS_STEPS.find(s => s.key === status);
+                        return (
+                          <div key={id} style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 8,
+                            background: isPast ? "#f5f5f5" : sub.color + "11",
+                            borderLeft: `3px solid ${sub.color}`,
+                            borderRadius: "0 8px 8px 0",
+                            padding: "5px 10px",
+                          }}>
+                            <span>{sub.emoji}</span>
+                            <span style={{ fontSize: 13, color: "#333", flexGrow: 1 }}>{lesson}</span>
+                            <span style={{ fontSize: 11, fontWeight: 700, color: st.color }}>{st.icon}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* STATS TAB */}
+        {tab === "stats" && (
+          <div>
+            {/* Pie-like summary */}
+            <div style={{ background: "white", borderRadius: 16, padding: 20, marginBottom: 16, boxShadow: "0 2px 12px rgba(0,0,0,0.07)" }}>
+              <div style={{ fontWeight: 800, fontSize: 16, marginBottom: 16, textAlign: "center" }}>Bilan global 🎯</div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                {[
+                  { label: "Total de leçons", val: total, color: "#888", icon: "📚" },
+                  { label: "À réviser", val: countByStatus("todo"), color: "#d0d0d0", icon: "○" },
+                  { label: "Lues", val: read, color: "#5b9fe8", icon: "👁" },
+                  { label: "Apprises", val: learned, color: "#e8a23a", icon: "🧠" },
+                  { label: "Validées", val: validated, color: "#2ecf72", icon: "✅" },
+                  { label: "Progression", val: `${globalPct}%`, color: "#6c3fff", icon: "🚀" },
+                ].map(item => (
+                  <div key={item.label} style={{ background: "#f9f9fb", borderRadius: 12, padding: "14px 16px", textAlign: "center" }}>
+                    <div style={{ fontSize: 22 }}>{item.icon}</div>
+                    <div style={{ fontWeight: 800, fontSize: 22, color: item.color, marginTop: 2 }}>{item.val}</div>
+                    <div style={{ fontSize: 12, color: "#999", marginTop: 2 }}>{item.label}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Per subject */}
+            <div style={{ background: "white", borderRadius: 16, padding: 20, boxShadow: "0 2px 12px rgba(0,0,0,0.07)" }}>
+              <div style={{ fontWeight: 800, fontSize: 16, marginBottom: 14 }}>Par matière 📊</div>
+              {SUBJECTS.map(subject => {
+                const subIds = subject.lessons.map((_, i) => `${subject.id}_${i}`);
+                const n = subIds.length;
+                const todo = subIds.filter(id => !statuses[id] || statuses[id] === "todo").length;
+                const lue = subIds.filter(id => statuses[id] === "lue").length;
+                const apprise = subIds.filter(id => statuses[id] === "apprise").length;
+                const validee = subIds.filter(id => statuses[id] === "validee").length;
+                const pct = Math.round(((n - todo) / n) * 100);
+                return (
+                  <div key={subject.id} style={{ marginBottom: 14 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 5 }}>
+                      <span>{subject.emoji}</span>
+                      <span style={{ fontWeight: 700, fontSize: 14, color: "#333", flexGrow: 1 }}>{subject.label}</span>
+                      <span style={{ fontWeight: 800, fontSize: 13, color: subject.color }}>{pct}%</span>
+                    </div>
+                    {/* Stacked bar */}
+                    <div style={{ height: 10, borderRadius: 8, background: "#eee", overflow: "hidden", display: "flex" }}>
+                      <div style={{ width: `${(validee/n)*100}%`, background: "#2ecf72", transition: "width 0.4s" }} />
+                      <div style={{ width: `${(apprise/n)*100}%`, background: "#e8a23a", transition: "width 0.4s" }} />
+                      <div style={{ width: `${(lue/n)*100}%`, background: "#5b9fe8", transition: "width 0.4s" }} />
+                    </div>
+                    <div style={{ display: "flex", gap: 10, marginTop: 4, fontSize: 11, color: "#aaa" }}>
+                      <span>✅ {validee}</span>
+                      <span>🧠 {apprise}</span>
+                      <span>👁 {lue}</span>
+                      <span>○ {todo}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
