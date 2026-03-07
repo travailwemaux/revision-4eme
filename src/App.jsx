@@ -4,109 +4,139 @@ const SUBJECTS = [
   {
     id: "francais", label: "Français", emoji: "📖", color: "#e8637a",
     lessons: [
-      "Grammaire : les propositions subordonnées relatives",
-      "Grammaire : les propositions subordonnées conjonctives",
-      "Conjugaison : le subjonctif présent",
-      "Conjugaison : le conditionnel",
-      "Orthographe : accord du participe passé",
-      "Lexique : préfixes et suffixes latins/grecs",
-      "Lecture : figures de style (métaphore, comparaison, hyperbole…)",
-      "Textes : récit d'aventure & roman historique",
-      "Textes : poésie (versification, registres)",
-      "Rédaction : le portrait et la description",
-      "Rédaction : argumentation et point de vue",
+      "5 - A DEFINIR",
+      "4 - Propositions indépendantes et subordonnées",
+      "4 - Le réalisme / impressionnisme",
+      "4 - Champs lexicaux / sémantique",
+      "4 - Les valeurs du temps du récit / schéma narratif",
+      "4 - Les modalisateurs",
+      "4 - Les classes grammaticales",
+      "4 - Le fantastique",
+      "4 - Phrases actives / passives",
+      "4 - Accorder un participe passé",
+      "4 - Schéma d'une thèse",
+      "4 - Les médias"
     ]
   },
-  {
+    {
     id: "maths", label: "Mathématiques", emoji: "📐", color: "#5b7fe8",
     lessons: [
-      "Calcul littéral : développer et factoriser",
-      "Équations du premier degré",
-      "Systèmes d'équations",
-      "Puissances et notation scientifique",
-      "Fractions : opérations et simplification",
-      "Proportionnalité et pourcentages",
-      "Statistiques : moyenne, médiane, étendue",
-      "Géométrie : théorème de Pythagore",
-      "Géométrie : théorème de Thalès",
-      "Géométrie : symétrie centrale",
-      "Trigonométrie : sin, cos, tan dans le triangle rectangle",
+      "6 - A DEFINIR",
+      "5 - A DEFINIR",
+      "4 - A DEFINIR",
     ]
   },
   {
-    id: "histoire", label: "Histoire-Géographie", emoji: "🌍", color: "#e8a23a",
+    id: "geographie", label: "Géographie", emoji: "🌍", color: "#e8a23a",
     lessons: [
-      "Histoire : L'Europe et le monde au XVIIIe siècle",
-      "Histoire : La Révolution française",
-      "Histoire : L'Empire napoléonien",
-      "Histoire : Les révolutions industrielles",
-      "Histoire : Le XIXe siècle — nationalismes et colonisation",
-      "Géographie : dynamiques des espaces productifs",
-      "Géographie : mobilités et échanges mondiaux",
-      "Géographie : les inégalités de développement",
-      "EMC : droits et libertés fondamentaux",
-      "EMC : citoyenneté et démocratie",
+      "L'urbanisation",
+      "Définitions",
+      "Les villes dans la mondialisation",
     ]
   },
   {
-    id: "anglais", label: "Anglais (LV1)", emoji: "🇬🇧", color: "#5bbfe8",
+    id: "histoire", label: "Histoire", emoji: "🏛️", color: "#e8a23a",
     lessons: [
-      "Vocabulaire : famille, relations sociales",
-      "Vocabulaire : société et environnement",
-      "Grammaire : prétérit simple vs be+ing",
-      "Grammaire : present perfect",
-      "Grammaire : modaux (can, could, must, should, would)",
-      "Grammaire : conditionnel (if + clauses)",
-      "Compréhension écrite : inférence et repérage",
-      "Expression écrite : décrire et raconter",
+      "L'expansion commerciale",
+      "Le commerce triangulaire et l'esclavage",
+      "La monarchie absolue",
+      "Philosophes des Lumières",
+      "La Révolution française et l'Empire",
     ]
   },
-  {
-    id: "espagnol", label: "Espagnol (LV2)", emoji: "🇪🇸", color: "#e85b5b",
+    {
+    id: "emc", label: "EMC", emoji: "🗽", color: "#e8a23a",
     lessons: [
-      "Vocabulaire : vie quotidienne et loisirs",
-      "Vocabulaire : pays hispanophones",
-      "Grammaire : les verbes en -ar, -er, -ir au présent",
-      "Grammaire : les verbes irréguliers courants",
-      "Grammaire : le prétérit indéfini (indefinido)",
-      "Grammaire : les pronoms COD et COI",
-      "Compréhension et expression orale",
-    ]
-  },
-  {
-    id: "svt", label: "SVT", emoji: "🔬", color: "#5be87a",
-    lessons: [
-      "La reproduction sexuée chez les animaux",
-      "La reproduction chez les plantes à fleurs",
-      "La transmission du vivant — génétique",
-      "Le système nerveux et la coordination",
-      "L'immunité — défenses de l'organisme",
-      "Les écosystèmes et la biodiversité",
-      "L'impact humain sur l'environnement",
-    ]
-  },
-  {
-    id: "physique", label: "Physique-Chimie", emoji: "⚗️", color: "#b05be8",
-    lessons: [
-      "La lumière : réflexion et réfraction",
-      "Les couleurs et la dispersion de la lumière",
-      "Les atomes et les molécules",
-      "Les réactions chimiques (équations bilan)",
-      "Les mélanges et la dissolution",
-      "L'électricité : tension, intensité, résistance",
-      "Les lois d'Ohm et de Kirchhoff",
+      "Liberté / Egalité",
     ]
   },
   {
     id: "techno", label: "Technologie", emoji: "💻", color: "#e8c85b",
     lessons: [
-      "Les systèmes automatisés et programmés",
-      "Algorithmique et programmation (Scratch/Python)",
-      "Modélisation numérique — CAO",
-      "Communication et réseaux informatiques",
-      "Impact des objets techniques sur l'environnement",
+      "Stations de vélos électriques",
+      "Analyses fonctionnelles",
+      "La technologie RFID",
+      "Chaines d'information / d'énergie",
+      "Diagramme des interracteurs",
+      "Les contraintes",
+      "Apprendre à une machine à reconnaitre des poissons",
+      "Les évolutions des objets",
+      "Invention / découverte / innovation",
+      "Avantages et inconvénients d'objets",
+      "Bilan energétique d'une maison",
+      "Caractéristiques des radiateurs",
+      "Tableau de la consommation",
+      "Les ampoules",
+      "Les thermostats",
+      "Internet",
+      "Programme Scratch",
+      "Schéma carré, losange, rond",
+      "Connecter un objet à un réseau"
     ]
   },
+
+  {
+    id: "svt", label: "SVT", emoji: "🔬", color: "#5be87a",
+    lessons: [
+      "L'homme face aux micro-organismes",
+      "Les barrières naturelles",
+      "Comment se protéger de la contamination / infection ?",
+      "Carte mentale bilan",
+      "Calculer la taille réelle d'un objet",
+      "Les graphiques",
+      "Les antibiogrammes",
+      "Caractères des êtres vivants ( individuels, spécifiques )",
+      "Transmission des caractères",
+      "La brebis Dolly",
+      "Le contenu d'une cellule",
+      "Les paires de chromosomes",
+      "L'ADN",
+      "Lexique de la reproduction",
+      "Changement morphologique / physiologique",
+      "La puberté",
+      "Expérience du poulet",
+      "Apparition des CS2",
+      "Formation d'un nouvel individu",
+      "Schéma des appareils reproducteurs",
+      "Tableau des cellules reproductrices",
+      "Les règles",
+      "La formation d'un foetus",
+      "Paroie de l'utérus",
+      "De la fécondation à la naissance"
+
+    ]
+  },
+
+  {
+    id: "physique", label: "Physique-Chimie", emoji: "⚗️", color: "#b05be8",
+    lessons: [
+      "Les sources d'énergie",
+      "Intêrets / inconvénients des énergies renouvelables",
+      "Les chaines énergétiques",
+      "Toutes les énergies",
+      "Transfert d'énergie",
+      "Puissance et énergie",
+      "Les propriétés de l'air",
+      "Compressibilité, expansibilité, élasticité de l'air",
+      "Pression atmosphérique",
+      "La masse de l'air",
+      "Représentation d'un gaz, d'un solide, d'un liquide",
+      "Représentation moléculaire",
+      "Dissolution et missibilité",
+      "Les atomes",
+      "Le tableau périodique des éléments",
+      "Le tableau des molécules et leurs compositions en atomes",
+      "Combustion, combustible et comburant",
+      "Triangle du feu",
+    ]
+  },
+
+
+
+
+
+
+
 ];
 
 const STATUS_STEPS = [
@@ -477,13 +507,14 @@ export default function App() {
               <div style={{ fontWeight: 800, fontSize: 16, marginBottom: 16, textAlign: "center" }}>Bilan global 🎯</div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                 {[
+                  { label: "Progression", val: `${globalPct}%`, color: "#6c3fff", icon: "🚀" },
                   { label: "Total de leçons", val: total, color: "#888", icon: "📚" },
                   { label: "À réviser", val: countByStatus("todo"), color: "#d0d0d0", icon: "○" },
                   { label: "Apprises", val: learned, color: "#e8a23a", icon: "🧠" },
                   { label: "Validées", val: validated, color: "#2ecf72", icon: "✅" },
-                  { label: "Progression", val: `${globalPct}%`, color: "#6c3fff", icon: "🚀" },
+                  
                 ].map(item => (
-                  <div key={item.label} style={{ background: "#f9f9fb", borderRadius: 12, padding: "14px 16px", textAlign: "center" }}>
+                  <div key={item.label} style={{ background: "#f9f9fb", borderRadius: 12, padding: "14px 16px", textAlign: "center", gridColumn: item.label === "Progression" ? "1 / -1" : undefined }}>
                     <div style={{ fontSize: 22 }}>{item.icon}</div>
                     <div style={{ fontWeight: 800, fontSize: 22, color: item.color, marginTop: 2 }}>{item.val}</div>
                     <div style={{ fontSize: 12, color: "#999", marginTop: 2 }}>{item.label}</div>
