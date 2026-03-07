@@ -21,9 +21,21 @@ const SUBJECTS = [
     {
     id: "maths", label: "Mathématiques", emoji: "📐", color: "#5b7fe8",
     lessons: [
-      "6 - A DEFINIR",
-      "5 - A DEFINIR",
-      "4 - A DEFINIR",
+      "5 - Enchainement d'opérations",
+      "5 - Rappels de 6ème",
+      "5 - Abscisse et ordonnée d'un point",
+      "5 - Mesure d'angles",
+      "5 - Nombres permiers",
+      "5 - Expressions litérales",
+      "5 - Les solides",
+      "5 - Les égalités de fractions",
+      "4 - Multiplication simple / successive",
+      "4 - Pythagoe + réciproque + contraposée",
+      "4 - Divisions",
+      "4 - Théorème de Thalès + réciproque + contraposée",
+      "4 - Simplification / comparaison de fractions",
+      "4 - Vocabulaire triangle",
+      "4 - Cosinus",
     ]
   },
   {
