@@ -111,7 +111,6 @@ const SUBJECTS = [
 
 const STATUS_STEPS = [
   { key: "todo",     label: "À réviser", color: "#d0d0d0", bg: "#f5f5f5",  icon: "○" },
-  { key: "lue",      label: "Lue",       color: "#5b9fe8", bg: "#eaf2ff",  icon: "👁" },
   { key: "apprise",  label: "Apprise",   color: "#e8a23a", bg: "#fff7e6",  icon: "🧠" },
   { key: "validee",  label: "Validée",   color: "#2ecf72", bg: "#e6fff1",  icon: "✅" },
 ];
@@ -210,15 +209,15 @@ export default function App() {
   const [openSubjects, setOpenSubjects] = useState({});
   const [showSettings, setShowSettings] = useState(false);
   const [examDateStr, setExamDateStr] = useState(() => {
-    try { return localStorage.getItem("exam_date") || "2026-03-21"; } catch { return "2026-03-21"; }
+    try { return localStorage.getItem("exam_date") || "2026-03-19"; } catch { return "2026-03-19"; }
   });
   const [tempDateStr, setTempDateStr] = useState(() => {
-    try { return localStorage.getItem("exam_date") || "2026-03-21"; } catch { return "2026-03-21"; }
+    try { return localStorage.getItem("exam_date") || "2026-03-19"; } catch { return "2026-03-19"; }
   });
 
   const examDate = (() => {
     const d = new Date(examDateStr + "T00:00:00");
-    return isNaN(d) ? new Date("2026-03-21") : d;
+    return isNaN(d) ? new Date("2026-03-19") : d;
   })();
 
   useEffect(() => {
@@ -246,10 +245,8 @@ export default function App() {
   const countByStatus = key => allIds.filter(id => (statuses[id] || "todo") === key).length;
   const validated = countByStatus("validee");
   const learned = countByStatus("apprise");
-  const read = countByStatus("lue");
-  const done = validated + learned + read;
+  const done = validated + learned;
   const globalPct = Math.round((done / total) * 100);
-  const validatedPct = Math.round((validated / total) * 100);
 
   const { plan, workDays } = distributeLessons(statuses, examDate);
 
@@ -290,7 +287,7 @@ export default function App() {
       <div style={{ background: "linear-gradient(135deg, #6c3fff, #e84393)", padding: "24px 20px 20px", color: "white", textAlign: "center", boxShadow: "0 4px 20px rgba(108,63,255,0.3)", position: "relative" }}>
         <button onClick={() => { setTempDateStr(examDateStr); setShowSettings(true); }} style={{ position: "absolute", top: 16, right: 16, zIndex: 1, background: "rgba(255,255,255,0.2)", border: "none", borderRadius: 10, padding: "6px 12px", color: "white", cursor: "pointer", fontSize: 18, fontFamily: "inherit" }} title="Paramètres">⚙️</button>
         <div style={{ fontSize: 13, opacity: 0.85, letterSpacing: 2, textTransform: "uppercase", marginBottom: 4 }}>Révisions 4ème</div>
-        <div style={{ fontSize: 26, fontWeight: 800, marginBottom: 4 }}>Épreuves Communes 📚</div>
+        <div style={{ fontSize: 26, fontWeight: 800, marginBottom: 4 }}>Épreuves Communes</div>
         <div style={{ fontSize: 13, opacity: 0.9 }}>
           Examen le <strong>{examDateFormatted}</strong> · <strong>{daysLeft > 0 ? `${daysLeft} jours restants` : daysLeft === 0 ? "C'est aujourd'hui ! 💪" : "Examen passé"}</strong>
         </div>
@@ -306,7 +303,6 @@ export default function App() {
           </div>
           <div style={{ display: "flex", gap: 12, marginTop: 10, justifyContent: "center", fontSize: 12, flexWrap: "wrap" }}>
             {[
-              { label: "Lues", val: read, color: "#93c4ff" },
               { label: "Apprises", val: learned, color: "#ffd093" },
               { label: "Validées", val: validated, color: "#93ffc0" },
             ].map(x => (
@@ -353,7 +349,7 @@ export default function App() {
         {tab === "matieres" && (
           <div>
             <p style={{ color: "#888", fontSize: 13, textAlign: "center", marginBottom: 16 }}>
-              Cliquez sur le statut d'une leçon pour le faire avancer : <br></br><strong>À réviser → Lue → Apprise → Validée</strong>
+              Cliquez sur le statut d'une leçon pour le faire avancer : <br></br><strong>À réviser → Apprise → Validée</strong>
             </p>
             {SUBJECTS.map(subject => {
               const subIds = subject.lessons.map((_, i) => `${subject.id}_${i}`);
@@ -492,7 +488,6 @@ export default function App() {
                 {[
                   { label: "Total de leçons", val: total, color: "#888", icon: "📚" },
                   { label: "À réviser", val: countByStatus("todo"), color: "#d0d0d0", icon: "○" },
-                  { label: "Lues", val: read, color: "#5b9fe8", icon: "👁" },
                   { label: "Apprises", val: learned, color: "#e8a23a", icon: "🧠" },
                   { label: "Validées", val: validated, color: "#2ecf72", icon: "✅" },
                   { label: "Progression", val: `${globalPct}%`, color: "#6c3fff", icon: "🚀" },
@@ -513,7 +508,6 @@ export default function App() {
                 const subIds = subject.lessons.map((_, i) => `${subject.id}_${i}`);
                 const n = subIds.length;
                 const todo = subIds.filter(id => !statuses[id] || statuses[id] === "todo").length;
-                const lue = subIds.filter(id => statuses[id] === "lue").length;
                 const apprise = subIds.filter(id => statuses[id] === "apprise").length;
                 const validee = subIds.filter(id => statuses[id] === "validee").length;
                 const pct = Math.round(((n - todo) / n) * 100);
@@ -528,12 +522,10 @@ export default function App() {
                     <div style={{ height: 10, borderRadius: 8, background: "#eee", overflow: "hidden", display: "flex" }}>
                       <div style={{ width: `${(validee/n)*100}%`, background: "#2ecf72", transition: "width 0.4s" }} />
                       <div style={{ width: `${(apprise/n)*100}%`, background: "#e8a23a", transition: "width 0.4s" }} />
-                      <div style={{ width: `${(lue/n)*100}%`, background: "#5b9fe8", transition: "width 0.4s" }} />
                     </div>
                     <div style={{ display: "flex", gap: 10, marginTop: 4, fontSize: 11, color: "#aaa" }}>
                       <span>✅ {validee}</span>
                       <span>🧠 {apprise}</span>
-                      <span>👁 {lue}</span>
                       <span>○ {todo}</span>
                     </div>
                   </div>
