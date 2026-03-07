@@ -184,19 +184,6 @@ function StatusBadge({ status, onClick }) {
   );
 }
 
-function ProgressBar({ pct, color }) {
-  return (
-    <div style={{ background: "#eee", borderRadius: 8, height: 10, overflow: "hidden", flexGrow: 1 }}>
-      <div style={{
-        width: `${pct}%`,
-        background: color,
-        height: "100%",
-        borderRadius: 8,
-        transition: "width 0.4s ease",
-      }} />
-    </div>
-  );
-}
 
 export default function App() {
   const [statuses, setStatuses] = useState(() => {
@@ -354,7 +341,8 @@ export default function App() {
             {SUBJECTS.map(subject => {
               const subIds = subject.lessons.map((_, i) => `${subject.id}_${i}`);
               const subValidated = subIds.filter(id => statuses[id] === "validee").length;
-              const subDone = subIds.filter(id => statuses[id] && statuses[id] !== "todo").length;
+              const subApprise = subIds.filter(id => statuses[id] === "apprise").length;
+              const subDone = subValidated + subApprise;
               const subPct = Math.round((subDone / subIds.length) * 100);
               const isOpen = openSubjects[subject.id] !== false; // open by default
 
@@ -370,7 +358,10 @@ export default function App() {
                       <div style={{ flexGrow: 1, minWidth: 0 }}>
                         <div style={{ fontWeight: 800, fontSize: 15, color: "#222" }}>{subject.label}</div>
                         <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 4 }}>
-                          <ProgressBar pct={subPct} color={subject.color} />
+                          <div style={{ background: "#eee", borderRadius: 8, height: 10, overflow: "hidden", flexGrow: 1, display: "flex" }}>
+                            <div style={{ width: `${(subValidated / subIds.length) * 100}%`, background: "#2ecf72", transition: "width 0.4s" }} />
+                            <div style={{ width: `${(subApprise / subIds.length) * 100}%`, background: "#e8a23a", transition: "width 0.4s" }} />
+                          </div>
                           <span style={{ fontSize: 12, fontWeight: 700, color: subject.color, minWidth: 36 }}>{subPct}%</span>
                         </div>
                       </div>
