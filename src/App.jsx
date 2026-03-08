@@ -4,7 +4,13 @@ const SUBJECTS = [
   {
     id: "francais", label: "Français", emoji: "📖", color: "#e8637a",
     lessons: [
-      "5 - A DEFINIR",
+      "5 - Les 5 classes de mots invariables / variables",
+      "5 - Différences entre familles / synonymes",
+      "5 - Les modes",
+      "5 - Phrases simples / complexes",
+      "5 - COD / COI et fonctions grammaticales",
+      "5 - Préposition / adverbes / conjonctions de coordination / conjonctions de subordination",
+      "5- Les types de phrases",
       "4 - Propositions indépendantes et subordonnées",
       "4 - Le réalisme / impressionnisme",
       "4 - Champs lexicaux / sémantique",
