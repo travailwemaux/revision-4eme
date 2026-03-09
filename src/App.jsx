@@ -42,6 +42,7 @@ const SUBJECTS = [
       "4 - Simplification / comparaison de fractions",
       "4 - Vocabulaire triangle",
       "4 - Cosinus",
+      "4 - Multiplication / division de fractions",
     ]
   },
   {
